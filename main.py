@@ -91,7 +91,7 @@ def sidebar_content():
             "Start",
             "Tłumaczenie",
             "Historia tłumaczeń",
-            "Słówka",
+            "Słówka do zapamiętania",
             "Wyszukaj słówka"
         ],
         key="menu_sidebar_radio",
@@ -136,7 +136,7 @@ elif menu == "Historia tłumaczeń":
     lang_mapping, *_ = get_lang_mappings()
     display_translation_history(lang_mapping)
 
-elif menu == "Słówka":
+elif menu == "Słówka do zapamiętania":
     st.title("🗂️ Twoje słówka")
     display_vocabulary()
 
