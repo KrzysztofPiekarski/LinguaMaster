@@ -1,0 +1,6 @@
+.env
+core/_pycache_
+data/_pycache_
+services/_pycache_
+ui/_pycache_
+translations.db

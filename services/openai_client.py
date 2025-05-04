@@ -1,0 +1,115 @@
+from pydantic import BaseModel
+from langfuse.decorators import observe
+from io import BytesIO
+import openai
+import random
+
+# klasa Translation
+class Translation(BaseModel):
+    translated_text: str
+    language: str
+
+# Funkcja pomocnicza do sprawdzenia klucza API
+def check_api_key(api_key):
+    if not api_key:
+        raise ValueError("Brak klucza API OpenAI. Proszę podać poprawny klucz.")
+
+@observe()
+# Funkcja do tłumaczenia tekstu za pomocą AI
+def translate_text_with_openai(api_key, text, src_lang, dest_lang):
+    openai.api_key = api_key
+    response = openai.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "Jesteś profesjonalnym tłumaczem."},
+            {
+                "role": "user",
+                "content": f"Przetłumacz ten tekst bez żadnych komentarzy z {src_lang} na {dest_lang}: {text}.",
+            },
+        ],
+        max_tokens=500,
+    )
+    translated_text = response.choices[0].message.content.strip()
+    return Translation(translated_text=translated_text, language=dest_lang)
+
+
+def text_to_speech_tts1(text):
+    response = openai.audio.speech.create(
+        model="tts-1",
+        input=text,
+        voice="alloy",
+    )
+    audio_content = response.content
+    audio = BytesIO(audio_content)
+    audio.seek(0)
+
+    return audio
+
+@observe()
+@observe
+# Funkcja do uzyskiwania wskazówek gramatycznych od AI
+def get_grammar_tips(api_key, src_text, translated_text, src_lang, dest_lang):
+    openai.api_key = api_key
+    messages = [
+        {"role": "system", "content": "Jesteś ekspertem od gramatyki."},
+        {
+            "role": "user",
+            "content": f"Podaj wskazówki gramatyczne dla następującego tłumaczenia:\n\nOryginał ({src_lang}): {src_text}\nPrzetłumaczone ({dest_lang}): {translated_text}\n\nWyjaśnij kluczowe różnice gramatyczne.",
+        },
+    ]
+    response = openai.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+        # max_tokens=500,
+        stream=True,
+    )
+    return response
+
+
+@observe
+# Funkcja do sprawdzania umiejętności użytkownika
+def analyze_user_text(api_key, user_text):
+    try:
+        openai.api_key = api_key
+        messages = [
+            {
+                "role": "system",
+                "content": "Znasz wszystkie języki świata i jesteś ekspertem od gramatyki, składni i poprawności językowej.",
+            },
+            {
+                "role": "user",
+                "content": f"Sprawdź poniższy tekst pod kątem błędów gramatycznych, składniowych oraz udziel po krótce sugestii. Oto tekst: {user_text}",
+            },
+        ]
+        response = openai.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+        )
+        feedback = response.choices[0].message.content.strip()
+        return feedback
+    except openai.AuthenticationError:
+        return None
+
+    except (openai.AuthenticationError, openai.OpenAIError) as e:
+        return f"Wystąpił błąd: {str(e)}"
+
+# Funkcja do quizu gramatycznego
+def generate_grammar_quiz(translated_text):
+    quiz = []
+    words = translated_text.split()
+    for _ in range(3):
+        random_word = random.choice(words)
+        quiz.append(f"Jaką rolę gramatyczną pełni słowo '{random_word}' w tym zdaniu?")
+    return quiz
+
+
+# Funkcja do generowania losowych słów
+def generate_random_words(dest_lang, num_words=3):
+    try:
+        prompt = f"Wygeneruj {num_words} losowych słów w języku {dest_lang} i je ponumeruj oraz podaj tłumaczenie dla każdego słowa w języku polskim."
+        response = openai.chat.completions.create(
+            model="gpt-4", messages=[{"role": "user", "content": prompt}], max_tokens=50
+        )
+        return response.choices[0].message.content.strip().split(", ")
+    except openai.OpenAIError:
+        return []

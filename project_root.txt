@@ -1,0 +1,14 @@
+
+LinguaMaster/
+├── main.py               # uruchamia aplikację
+├── core/
+│   ├── translator.py     # tłumaczenia i TTS
+│   ├── grammar.py        # wskazówki gramatyczne
+│   ├── quiz.py           # quizy gramatyczne
+│   └── utils.py          # narzędzia pomocnicze
+├── services/
+│   └── openai_client.py  # wywołania OpenAI
+├── data/
+│   └── database.py       # operacje na bazie danych
+├── ui/
+│   └── sidebar.py        # sidebar ze słówkami i historią
