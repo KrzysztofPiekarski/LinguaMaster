@@ -1,5 +1,5 @@
 .env
-LINGUAMASTER/core/_pycache_
+core/_pycache_
 data/_pycache_
 services/_pycache_
 ui/_pycache_
