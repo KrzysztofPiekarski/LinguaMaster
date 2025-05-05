@@ -1,6 +1,7 @@
 import streamlit as st
 from services.openai_client import analyze_user_text, generate_random_words
 from core.utils import get_lang_mappings
+import openai
 
 def handle_exercise_tab():
     # Pobierz mapowanie języków
@@ -37,4 +38,39 @@ def handle_exercise_tab():
     user_sentence = st.text_input("Twoje zdanie:", key="user_sentence")
     if st.button("Sprawdź zdanie") and user_sentence.strip():
         feedback = analyze_user_text(api_key, user_sentence)
-        st.write(feedback)
+        st.write(feedback) 
+    
+    # --- Dodany chatbot językowy ---
+    st.markdown("---")  # Separator
+    handle_chatbot(api_key)
+
+
+def handle_chatbot(api_key: str):
+    st.subheader("Asystent językowy 🤖")
+
+    user_input = st.text_input("Wprowadź wiadomość do chatbota:", key="chatbot_input")
+
+    if not api_key:
+        st.info("Podaj klucz API, aby korzystać z asystenta.")
+        return
+
+    if user_input and st.button("Wyślij"):
+        conversation_messages = [
+            {
+                "role": "system",
+                "content": "Jesteś ekspertem do spraw językowych. Znasz wszystkie języki świata i udzielasz kompleksowych porad oraz odpowiedzi na pytania użytkownika.",
+            },
+            {"role": "user", "content": user_input},
+        ]
+
+        # UTWÓRZ klienta z kluczem API
+        client = openai.OpenAI(api_key=api_key)
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=conversation_messages,
+            max_tokens=300,
+        )
+
+        chatbot_reply = response.choices[0].message.content.strip()
+        st.write(chatbot_reply)
