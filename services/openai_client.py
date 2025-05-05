@@ -67,31 +67,39 @@ def get_grammar_tips(api_key, src_text, translated_text, src_lang, dest_lang):
 
 
 @observe
-# Funkcja do sprawdzania umiejętności użytkownika
 def analyze_user_text(api_key, user_text):
     try:
         openai.api_key = api_key
         messages = [
             {
                 "role": "system",
-                "content": "Znasz wszystkie języki świata i jesteś ekspertem od gramatyki, składni i poprawności językowej.",
+                "content": (
+                    "Jesteś ekspertem językowym znającym wszystkie języki świata. "
+                    "Twoim zadaniem jest analizować teksty pod względem gramatyki, składni i poprawności językowej. "
+                    "Podawaj konkretne błędy oraz krótkie sugestie jak poprawić tekst. "
+                    "Odpowiedź powinna być zwięzła i pomocna."
+                ),
             },
             {
                 "role": "user",
-                "content": f"Sprawdź poniższy tekst pod kątem błędów gramatycznych, składniowych oraz udziel po krótce sugestii. Oto tekst: {user_text}",
+                "content": f"Sprawdź poniższy tekst:\n\n{user_text}",
             },
         ]
         response = openai.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
+            max_tokens=500,  
+            temperature=0.7,
         )
         feedback = response.choices[0].message.content.strip()
         return feedback
-    except openai.AuthenticationError:
-        return None
 
-    except (openai.AuthenticationError, openai.OpenAIError) as e:
+    except openai.AuthenticationError:
+        return "Błąd autoryzacji: sprawdź klucz API."
+
+    except openai.OpenAIError as e:
         return f"Wystąpił błąd: {str(e)}"
+
 
 # Funkcja do quizu gramatycznego
 def generate_grammar_quiz(translated_text):

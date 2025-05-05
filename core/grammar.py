@@ -36,9 +36,16 @@ def handle_exercise_tab():
 
     # Wprowadzenie zdania do analizy
     user_sentence = st.text_input("Twoje zdanie:", key="user_sentence")
-    if st.button("Sprawdź zdanie") and user_sentence.strip():
-        feedback = analyze_user_text(api_key, user_sentence)
-        st.write(feedback) 
+
+    if st.button("Sprawdź zdanie"):
+        if not api_key:
+            st.error("Klucz API jest wymagany.")
+        elif user_sentence.strip():
+            feedback = analyze_user_text(api_key, user_sentence)
+            st.subheader("📋 Analiza tekstu")
+            st.write(feedback)
+        else:
+            st.warning("⚠️ Proszę wprowadzić zdanie.")
     
     # --- Dodany chatbot językowy ---
     st.markdown("---")  # Separator
