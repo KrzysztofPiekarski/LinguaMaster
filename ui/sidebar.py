@@ -1,4 +1,3 @@
-
 import streamlit as st
 from core.utils import get_lang_mappings
 from core.translator import handle_translation_tab
@@ -22,7 +21,7 @@ def sidebar_content():
             font-weight: 700;
             color: #4F8BF9;
             margin-bottom: 0px;
-        '>📋 Szybkie Menu</div>
+        '>📋 Menu</div>
         """,
         unsafe_allow_html=True
     )
@@ -60,7 +59,7 @@ def sidebar_content():
             handle_exercise_tab()
 
     elif menu == "Tłumaczenie":
-        st.title("🔄 Szybkie tłumaczenie")
+        st.title("🌍💬 Szybkie tłumaczenie")
         api_key = st.text_input("Wprowadź klucz API OpenAI", type="password", key="api_key_input")
         text = st.text_area("Tekst do przetłumaczenia", key="translation_textarea")
 
@@ -80,11 +79,11 @@ def sidebar_content():
                 st.error(f"Wystąpił błąd podczas tłumaczenia: {e}")
 
     elif menu == "Historia tłumaczeń":
-        st.title("📜 Historia tłumaczeń")
+        st.title("🕒📜 Historia tłumaczeń")
         display_translation_history(lang_mapping)
 
     elif menu == "Słówka do zapamiętania":
-        st.title("📝 Słówka do zapamiętania")
+        st.title("🧠💡 Słówka do zapamiętania")
 
         # Formularz dodawania nowego słowa
         col1, col2, col3 = st.columns(3)
@@ -118,24 +117,26 @@ def sidebar_content():
                 st.rerun()
 
     elif menu == "Wyszukaj słówka":
-        st.title("🔍 Wyszukiwanie słówek")
+        st.title("🔎📝 Wyszukiwanie słówek")
         search_vocabulary()
 
 def display_translation_history(lang_mapping, limit=None):
-    """Wyświetla historię tłumaczeń z możliwością zmiany limitu"""
+    """Wyświetla historię tłumaczeń w głównym panelu aplikacji"""
     db = st.session_state.db
-    
-    # Dodajemy suwak do zmiany limitu wyświetlanych tłumaczeń
+
+    # Suwak do wyboru liczby tłumaczeń
     if limit is None:
-        limit = st.sidebar.slider("Liczba tłumaczeń do wyświetlenia", min_value=1, max_value=50, value=5)
+        limit = st.slider("Liczba tłumaczeń do wyświetlenia", min_value=1, max_value=50, value=5)
 
     history = db.get_translation_history(limit=limit)
-    
+
+    st.markdown("### Historia tłumaczeń")
+
     if history:
         for entry in history:
-            st.sidebar.write(f"{entry[1]} → {entry[2]} ({entry[3]} → {entry[4]})")
+            st.write(f"**{entry[1]}** → **{entry[2]}**  \n(_{entry[3]} → {entry[4]}_)")
     else:
-        st.sidebar.info("Brak historii tłumaczeń.")
+        st.info("Brak historii tłumaczeń.")
 
 def display_vocabulary():
     """Wyświetla słówka"""

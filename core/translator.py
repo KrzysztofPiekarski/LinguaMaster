@@ -30,7 +30,7 @@ def handle_translation_tab():
 
     text = st.text_area("Wprowadź tekst do przetłumaczenia", max_chars=300)
 
-    if st.button("Tłumacz"):
+    if st.button("🔠🔁 Tłumacz"):
         if not api_key or not text:
             st.info("Wprowadź klucz API i tekst.")
         else:
@@ -54,7 +54,7 @@ def handle_translation_tab():
             st.audio(st.session_state.audio)
 
     if api_key and "translated_text" in st.session_state:
-        if st.button("Pokaż wskazówki gramatyczne"):
+        if st.button("📝💡 Pokaż wskazówki gramatyczne"):
             tips = get_grammar_tips(api_key, text, st.session_state.translated_text, src_lang, dest_lang)
             st.session_state.grammar_tips = tips
             st.rerun()
@@ -62,7 +62,7 @@ def handle_translation_tab():
     if "grammar_tips" in st.session_state:
         st.write(st.session_state.grammar_tips)
 
-    if st.button("Generuj quiz"):
+    if st.button("🧠🎮 Generuj quiz"):
         quiz = generate_grammar_quiz(st.session_state.translated_text)
         for q in quiz:
             st.write(q)

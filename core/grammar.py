@@ -1,6 +1,7 @@
 import streamlit as st
 from services.openai_client import analyze_user_text, generate_random_words
 from core.utils import get_lang_mappings
+import streamlit.components.v1 as components
 import openai
 
 def handle_exercise_tab():
@@ -26,7 +27,7 @@ def handle_exercise_tab():
     st.write(", ".join(st.session_state.random_words))
 
     # Przyciski do losowania nowych słów
-    if st.button("Losuj 🎲"):
+    if st.button("🎲 Losuj"):
         if api_key:
             st.session_state.random_words = generate_random_words(dest_lang, api_key)  # Przekazanie api_key
             st.rerun()  # Odświeżenie strony, aby pokazać nowe słowa
@@ -37,7 +38,7 @@ def handle_exercise_tab():
     # Wprowadzenie zdania do analizy
     user_sentence = st.text_input("Twoje zdanie:", key="user_sentence")
 
-    if st.button("Sprawdź zdanie"):
+    if st.button("🔍 Sprawdź zdanie"):
         if not api_key:
             st.error("Klucz API jest wymagany.")
         elif user_sentence.strip():
@@ -51,33 +52,77 @@ def handle_exercise_tab():
     st.markdown("---")  # Separator
     handle_chatbot(api_key)
 
+def scroll_to_bottom():
+    """Automatyczne przewinięcie do dołu."""
+    scroll_script = """
+    <script>
+        var body = window.parent.document.querySelector(".main");
+        body.scrollTo({top: body.scrollHeight, behavior: "smooth"});
+    </script>
+    """
+    components.html(scroll_script, height=0)
 
 def handle_chatbot(api_key: str):
-    st.subheader("Asystent językowy 🤖")
-
-    user_input = st.text_input("Wprowadź wiadomość do chatbota:", key="chatbot_input")
+    st.subheader("🧠🗣️ Asystent językowy")
 
     if not api_key:
         st.info("Podaj klucz API, aby korzystać z asystenta.")
         return
 
-    if user_input and st.button("Wyślij"):
-        conversation_messages = [
-            {
-                "role": "system",
-                "content": "Jesteś ekspertem do spraw językowych. Znasz wszystkie języki świata i udzielasz kompleksowych porad oraz odpowiedzi na pytania użytkownika.",
-            },
-            {"role": "user", "content": user_input},
+    # Inicjalizacja historii
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+
+    if "last_user_input" not in st.session_state:
+        st.session_state.last_user_input = None
+
+    # Przycisk czyszczenia rozmowy
+    if st.button("🧹 Wyczyść rozmowę"):
+        st.session_state.chat_history = []
+        st.session_state.last_user_input = None
+        st.rerun()
+
+    # Wyświetl historię
+    for msg in st.session_state.chat_history:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+
+    # Jeśli jest nowe zapytanie z poprzedniego przebiegu, generujemy odpowiedź
+    if st.session_state.last_user_input:
+        with st.chat_message("user"):
+            st.markdown(st.session_state.last_user_input)
+
+        # Przygotuj dane do API
+        messages = [
+            {"role": "system", "content": "Jesteś ekspertem językowym. Odpowiadasz jasno, konkretnie i zrozumiale."}
+        ] + st.session_state.chat_history + [
+            {"role": "user", "content": st.session_state.last_user_input}
         ]
 
-        # UTWÓRZ klienta z kluczem API
-        client = openai.OpenAI(api_key=api_key)
+        try:
+            client = openai.OpenAI(api_key=api_key)
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=messages,
+                max_tokens=300,
+            )
+            reply = response.choices[0].message.content.strip()
+        except Exception as e:
+            reply = f"⚠️ Wystąpił błąd: {e}"
 
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=conversation_messages,
-            max_tokens=300,
-        )
+        st.session_state.chat_history.append({"role": "user", "content": st.session_state.last_user_input})
+        st.session_state.chat_history.append({"role": "assistant", "content": reply})
+        st.session_state.last_user_input = None
 
-        chatbot_reply = response.choices[0].message.content.strip()
-        st.write(chatbot_reply)
+        with st.chat_message("assistant"):
+            st.markdown(reply)
+
+        scroll_to_bottom()
+        st.rerun()
+
+    # Pole na nową wiadomość (na samym dole)
+    user_input = st.chat_input("Zadaj kolejne pytanie")
+
+    if user_input:
+        st.session_state.last_user_input = user_input
+        st.rerun()
