@@ -101,15 +101,19 @@ def analyze_user_text(api_key, user_text):
         return f"Wystąpił błąd: {str(e)}"
 
 
-# Funkcja do quizu gramatycznego
 def generate_grammar_quiz(translated_text):
     quiz = []
-    words = translated_text.split()
-    for _ in range(3):
-        random_word = random.choice(words)
-        quiz.append(f"Jaką rolę gramatyczną pełni słowo '{random_word}' w tym zdaniu?")
-    return quiz
+    words = translated_text.split()  # Dzielimy tekst na słowa
 
+    # Sprawdzamy, czy lista 'words' nie jest pusta
+    if words:
+        for _ in range(3):  # Generujemy 3 pytania
+            random_word = random.choice(words)
+            quiz.append(f"Jaką rolę gramatyczną pełni słowo '{random_word}' w tym zdaniu?")
+    else:
+        quiz.append("Brak słów w przetłumaczonym tekście, nie można wygenerować quizu.")
+
+    return quiz
 
 # Funkcja do generowania losowych słów
 def generate_random_words(dest_lang, num_words=3):

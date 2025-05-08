@@ -1,4 +1,3 @@
-
 import streamlit as st
 from data.database import DatabaseManager
 from core.utils import get_lang_mappings
@@ -30,30 +29,32 @@ def handle_translation_tab():
 
     text = st.text_area("Wprowadź tekst do przetłumaczenia", max_chars=300)
 
+    # Inicjalizacja 'translated_text' jeśli nie istnieje
+    if 'translated_text' not in st.session_state:
+        st.session_state.translated_text = ""  # Inicjalizujemy na pusty ciąg
+
     if st.button("🔠🔁 Tłumacz"):
         if not api_key or not text:
-            st.info("Wprowadź klucz API i tekst.")
+            st.info("Wprowadź klucz API oraz tekst.")
         else:
             try:
+                # Tłumaczenie tekstu
                 translation = translate_text_with_openai(api_key, text, src_lang, dest_lang)
                 st.session_state.translated_text = translation.translated_text
                 db.insert_translation(text, translation.translated_text, src_lang, dest_lang)
+
+                # Generowanie audio
                 st.session_state.audio = text_to_speech_tts1(translation.translated_text)
             except Exception as e:
-                st.error(str(e))
-            translation = translate_text_with_openai(api_key, text, src_lang, dest_lang)
-            st.session_state.translated_text = translation.translated_text
+                st.error(f"Error: {str(e)}")
 
-            db.insert_translation(text, translation.translated_text, src_lang, dest_lang)  # Używamy metody insert_translation
-            st.session_state.audio = text_to_speech_tts1(translation.translated_text)
-
-    if "translated_text" in st.session_state:
+    if st.session_state.translated_text:
         st.subheader(":red[Przetłumaczone tekst]")
         st.write(st.session_state.translated_text)
         if st.session_state.audio:
             st.audio(st.session_state.audio)
 
-    if api_key and "translated_text" in st.session_state:
+    if api_key and st.session_state.translated_text:
         if st.button("📝💡 Pokaż wskazówki gramatyczne"):
             tips = get_grammar_tips(api_key, text, st.session_state.translated_text, src_lang, dest_lang)
             st.session_state.grammar_tips = tips
