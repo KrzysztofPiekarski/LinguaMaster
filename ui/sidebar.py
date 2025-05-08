@@ -19,9 +19,9 @@ def sidebar_content():
         <div style='
             font-size: 34px;
             font-weight: 700;
-            color: #4F8BF9;
+            color: #4a90e2;
             margin-bottom: 0px;
-        '>📋 Menu</div>
+        '>🎓🧠 Menu</div>
         """,
         unsafe_allow_html=True
     )
