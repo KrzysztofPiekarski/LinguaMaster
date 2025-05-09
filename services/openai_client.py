@@ -118,10 +118,13 @@ def generate_grammar_quiz(translated_text):
 # Funkcja do generowania losowych słów
 def generate_random_words(dest_lang, num_words=3):
     try:
-        prompt = f"Wygeneruj {num_words} losowych słów w języku {dest_lang} i je ponumeruj oraz podaj tłumaczenie dla każdego słowa w języku polskim."
-        response = openai.chat.completions.create(
-            model="gpt-4", messages=[{"role": "user", "content": prompt}], max_tokens=50
+        prompt = f"Wygeneruj {num_words} losowych słów w języku {dest_lang} i"
+        response = openai.ChatCompletion.create(
+            model="gpt-4",  # Ensure you use the correct model here
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=50  # Adjust as needed
         )
-        return response.choices[0].message.content.strip().split(", ")
-    except openai.OpenAIError:
+        return response.choices[0].message['content'].strip().split(", ")
+    except Exception as e:
+        print(f"Error: {e}")
         return []
