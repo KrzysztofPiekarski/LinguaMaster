@@ -15,11 +15,11 @@ def get_db():
         st.session_state.db.create_tables()  # Tworzymy tabele bazy danych, jeśli jeszcze nie istnieją
     return st.session_state.db
 
-def handle_translation_tab():
+def handle_translation_tab(api_key: str): 
     db = get_db()  # Uzyskujemy dostęp do zainicjalizowanej bazy danych
     lang_mapping, lang_mapping2, _ = get_lang_mappings()
 
-    api_key = st.text_input("Wprowadź swój klucz API OpenAI", type="password")
+    # api_key = st.text_input("Wprowadź swój klucz API OpenAI", type="password")
 
     c1, c2 = st.columns(2)
     with c1:

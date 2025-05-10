@@ -9,11 +9,6 @@ class Translation(BaseModel):
     translated_text: str
     language: str
 
-# Funkcja pomocnicza do sprawdzenia klucza API
-def check_api_key(api_key):
-    if not api_key:
-        raise ValueError("Brak klucza API OpenAI. Proszę podać poprawny klucz.")
-
 @observe()
 # Funkcja do tłumaczenia tekstu za pomocą AI
 def translate_text_with_openai(api_key, text, src_lang, dest_lang):
@@ -46,7 +41,6 @@ def text_to_speech_tts1(text):
     return audio
 
 @observe()
-@observe
 # Funkcja do uzyskiwania wskazówek gramatycznych od AI
 def get_grammar_tips(api_key, src_text, translated_text, src_lang, dest_lang):
     openai.api_key = api_key
@@ -115,16 +109,28 @@ def generate_grammar_quiz(translated_text):
 
     return quiz
 
-# Funkcja do generowania losowych słów
 def generate_random_words(dest_lang, num_words=3):
     try:
-        prompt = f"Wygeneruj {num_words} losowych słów w języku {dest_lang} i"
-        response = openai.ChatCompletion.create(
-            model="gpt-4",  # Ensure you use the correct model here
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=50  # Adjust as needed
+        prompt = (
+            f"Wygeneruj {num_words} losowych słów w języku {dest_lang} wraz z ich tłumaczeniem na język polski. "
+            f"Podaj je w formacie:\n1. słowo (tłumaczenie)\n2. ..."
         )
-        return response.choices[0].message['content'].strip().split(", ")
+        response = openai.chat.completions.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=150,
+            temperature=0.9
+        )
+        result_text = response.choices[0].message.content.strip()
+
+        words = []
+        for line in result_text.split("\n"):
+            parts = line.strip().split(". ", 1)
+            if len(parts) == 2 and "(" in parts[1] and ")" in parts[1]:
+                word = parts[1].split(" (")[0].strip()
+                translation = parts[1].split(" (")[1].strip(")")
+                words.append((word, translation))
+        return words
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Błąd OpenAI: {e}")
         return []

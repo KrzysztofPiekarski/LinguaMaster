@@ -5,10 +5,8 @@ import boto3
 from data.database import DatabaseManager  # Importujemy DatabaseManager
 from ui.sidebar import sidebar_content  # Zaktualizowane wywołanie funkcji sidebar_content 
 
-# Upewnij się, że tabele są utworzone przy uruchomieniu aplikacji
-st.session_state.db.create_tables()
 
-# Konfiguracja aplikacji Streamlit
+# ✅ To musi być pierwsze polecenie Streamlit:
 st.set_page_config(page_title="LinguaMaster", layout="wide")
 
 # Ustawienie klienta DigitalOcean Spaces

@@ -46,6 +46,8 @@ def sidebar_content():
         key="menu_radio"
     )
 
+    api_key = st.sidebar.text_input("🔑 Klucz API OpenAI", type="password")
+
     # Pobieranie mapowań języków
     lang_mapping, lang_mapping2, lang_mapping3 = get_lang_mappings()
 
@@ -54,9 +56,9 @@ def sidebar_content():
         st.title(":blue[📚 LinguaMaster]")
         tab1, tab2 = st.tabs(["Tłumaczenie", "Interaktywne Ćwiczenia"])
         with tab1:
-            handle_translation_tab()
+            handle_translation_tab(api_key)
         with tab2:
-            handle_exercise_tab()
+            handle_exercise_tab(api_key)
 
     elif menu == "Tłumaczenie":
         st.title("🌍💬 Szybkie tłumaczenie")
