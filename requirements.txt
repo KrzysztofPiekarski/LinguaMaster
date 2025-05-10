@@ -3,7 +3,6 @@ openai
 langfuse
 python-dotenv
 streamlit
-threading
 boto3
-os
 io
+os
