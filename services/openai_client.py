@@ -109,7 +109,7 @@ def generate_grammar_quiz(translated_text):
 
     return quiz
 
-def generate_random_words(dest_lang, num_words=3):
+def generate_random_words(dest_lang, num_words=5):
     try:
         prompt = (
             f"Wygeneruj {num_words} losowych słów w języku {dest_lang} wraz z ich tłumaczeniem na język polski. "

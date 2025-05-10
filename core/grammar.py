@@ -15,16 +15,24 @@ def handle_exercise_tab(api_key: str):
     # Wybór języka
     dest_lang = st.selectbox("Wybierz język", list(lang_mapping3.keys()), key="dest_lang")
 
+    # Wybór liczby słów do wylosowania
+    num_words = st.slider("Ile słów chcesz wylosować?", min_value=3, max_value=10, value=5, step=1, key="num_words")
+
     # Inicjalizacja słów przy pierwszym uruchomieniu lub po zmianie języka
-    if "random_words_initialized" not in st.session_state or st.session_state.get("last_lang") != dest_lang:
-        st.session_state.random_words = generate_random_words(dest_lang)
+    if (
+        "random_words_initialized" not in st.session_state 
+        or st.session_state.get("last_lang") != dest_lang 
+        or st.session_state.get("last_num_words") != num_words
+    ):
+        st.session_state.random_words = generate_random_words(dest_lang, num_words=num_words)
         st.session_state.random_words_initialized = True
         st.session_state.last_lang = dest_lang
+        st.session_state.last_num_words = num_words
         st.session_state.user_sentence = ""
 
-    # Przyciski
-    if st.button("🎲 Losuj", key="draw_button"):
-        st.session_state.random_words = generate_random_words(dest_lang)
+    # Przycisk do losowania nowych słów
+    if st.button("🎲 Losuj"):
+        st.session_state.random_words = generate_random_words(dest_lang, num_words=num_words)
         st.session_state.user_sentence = ""
 
     # Wyświetl wylosowane słowa
@@ -36,7 +44,7 @@ def handle_exercise_tab(api_key: str):
     # Pole tekstowe
     user_sentence = st.text_input("Twoje zdanie:", key="user_sentence")
 
-    # Sprawdź zdanie
+    # Sprawdzenie zdania
     if st.button("🔍 Sprawdź zdanie"):
         if user_sentence.strip():
             feedback = analyze_user_text(api_key, user_sentence)
