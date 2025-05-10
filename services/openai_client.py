@@ -93,6 +93,9 @@ def analyze_user_text(api_key, user_text):
 
     except openai.OpenAIError as e:
         return f"Wystąpił błąd: {str(e)}"
+    
+    except Exception as e:
+        return f"Nieoczekiwany błąd: {str(e)}"
 
 
 def generate_grammar_quiz(translated_text):
