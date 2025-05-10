@@ -1,4 +1,3 @@
-
 import streamlit as st
 import streamlit.components.v1 as components
 import openai
@@ -16,26 +15,26 @@ def handle_exercise_tab(api_key: str):
     # Wybór języka (z zapamiętaniem)
     dest_lang = st.selectbox("Wybierz język", list(lang_mapping3.keys()), key="dest_lang")
 
-    # Jeśli nie ma losowych słów w sesji, generuj je
-    if "random_words" not in st.session_state:
-        st.session_state.random_words = generate_random_words(dest_lang)
+    # Obsługa przycisku losowania słów (ustaw flagę w sesji)
+    if st.button("🎲 Losuj", key="draw_button"):
+        st.session_state.new_words_requested = True
+        st.session_state.user_sentence = ""  # wyczyść pole zdania
 
+    # Wygeneruj nowe słowa, jeśli ustawiono flagę lub brak ich w sesji
+    if "random_words" not in st.session_state or st.session_state.get("new_words_requested"):
+        st.session_state.random_words = generate_random_words(dest_lang)
+        st.session_state.new_words_requested = False
+
+    # Wyświetlenie wygenerowanych słów
     if st.session_state.get("random_words"):
         st.write("Użyj słów w zdaniu:")
         formatted_words = [f"{word} ({translation})" for word, translation in st.session_state.random_words]
         st.write(", ".join(formatted_words))
 
-    # Przyciski do losowania nowych słów
-    if st.button("🎲 Losuj"):
-        if api_key:
-            st.session_state.random_words = generate_random_words(dest_lang)
-            st.rerun()
-        else:
-            st.info("Najpierw wprowadź klucz API")
-
-    # Wprowadzenie zdania do analizy
+    # Pole do wpisania zdania
     user_sentence = st.text_input("Twoje zdanie:", key="user_sentence")
 
+    # Sprawdzenie zdania
     if st.button("🔍 Sprawdź zdanie"):
         if user_sentence.strip():
             feedback = analyze_user_text(api_key, user_sentence)
