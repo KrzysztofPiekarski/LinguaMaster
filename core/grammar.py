@@ -12,29 +12,31 @@ def handle_exercise_tab(api_key: str):
     # Pobierz mapowanie języków
     lang_mapping, lang_mapping2, lang_mapping3 = get_lang_mappings()
 
-    # Wybór języka (z zapamiętaniem)
+    # Wybór języka
     dest_lang = st.selectbox("Wybierz język", list(lang_mapping3.keys()), key="dest_lang")
 
-    # Obsługa przycisku losowania słów (ustaw flagę w sesji)
-    if st.button("🎲 Losuj", key="draw_button"):
-        st.session_state.new_words_requested = True
-        st.session_state.user_sentence = ""  # wyczyść pole zdania
-
-    # Wygeneruj nowe słowa, jeśli ustawiono flagę lub brak ich w sesji
-    if "random_words" not in st.session_state or st.session_state.get("new_words_requested"):
+    # Inicjalizacja słów przy pierwszym uruchomieniu lub po zmianie języka
+    if "random_words_initialized" not in st.session_state or st.session_state.get("last_lang") != dest_lang:
         st.session_state.random_words = generate_random_words(dest_lang)
-        st.session_state.new_words_requested = False
+        st.session_state.random_words_initialized = True
+        st.session_state.last_lang = dest_lang
+        st.session_state.user_sentence = ""
 
-    # Wyświetlenie wygenerowanych słów
+    # Przyciski
+    if st.button("🎲 Losuj", key="draw_button"):
+        st.session_state.random_words = generate_random_words(dest_lang)
+        st.session_state.user_sentence = ""
+
+    # Wyświetl wylosowane słowa
     if st.session_state.get("random_words"):
         st.write("Użyj słów w zdaniu:")
         formatted_words = [f"{word} ({translation})" for word, translation in st.session_state.random_words]
         st.write(", ".join(formatted_words))
 
-    # Pole do wpisania zdania
+    # Pole tekstowe
     user_sentence = st.text_input("Twoje zdanie:", key="user_sentence")
 
-    # Sprawdzenie zdania
+    # Sprawdź zdanie
     if st.button("🔍 Sprawdź zdanie"):
         if user_sentence.strip():
             feedback = analyze_user_text(api_key, user_sentence)
