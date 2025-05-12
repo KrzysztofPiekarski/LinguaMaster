@@ -30,6 +30,10 @@ def handle_exercise_tab(api_key: str):
         st.session_state.last_num_words = num_words
         st.session_state.user_sentence = ""
 
+    # 🧭 Instrukcja dla użytkownika przed sprawdzeniem zdania
+    if not st.session_state.get("user_sentence"):
+        st.info("✍️ Najpierw wpisz zdanie z użyciem powyższych słów i kliknij „🔍 Sprawdź zdanie”. Dopiero potem możesz losować kolejne.")
+
     # Przycisk do losowania nowych słów
     if st.button("🎲 Losuj"):
         st.session_state.random_words = generate_random_words(dest_lang, num_words=num_words)
@@ -53,9 +57,9 @@ def handle_exercise_tab(api_key: str):
         else:
             st.warning("Proszę wprowadzić zdanie.")
 
-
     st.markdown("---")  # Separator
     handle_chatbot(api_key)
+
 
 def scroll_to_bottom():
     """Automatyczne przewinięcie do dołu."""
