@@ -4,5 +4,3 @@ langfuse
 python-dotenv
 streamlit
 boto3
-io
-os
